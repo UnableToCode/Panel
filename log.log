@@ -1,0 +1,31 @@
+2019-10-16 08:29:00: reshape w:100 h:100
+2019-10-16 08:29:00: reshape w:100 h:100
+2019-10-16 08:29:02: set Color r:255 g:0 b:0
+2019-10-16 08:29:02: draw line success id:5
+2019-10-16 08:29:03: Error: draw line failed, unknown algorithm: DD, excepted 'DDA' or 'Bresenham'
+2019-10-16 08:29:03: Error order:drawLine 3 7 39 93  DDA
+
+2019-10-16 08:29:03: Save success as output_1.bmp
+2019-10-16 08:29:04: set Color r:0 g:162 b:232
+2019-10-16 08:29:04: draw line success id:233
+2019-10-16 08:29:04: Save success as output_2.bmp
+2019-10-16 08:29:04: clip success id:
+2019-10-16 08:29:04: ['5', '33', '10', '70', '58', 'Cohen-Sutherland']
+2019-10-16 08:29:04: Save success as output_3.bmp
+2019-10-16 08:29:05: Rotate success id:5
+2019-10-16 08:29:05: Save success as output_4.bmp
+2019-10-16 08:29:05: draw Ellipsis success id:123
+2019-10-16 08:29:05: Rotate success id:123
+2019-10-16 08:29:06: Scale success id:123
+2019-10-16 08:29:07: set Color r:0 g:0 b:0
+2019-10-16 08:29:07: draw Polygon success id:666
+2019-10-16 08:29:08: Error: number of vertexes position args is wrong,expected 12 got 14
+2019-10-16 08:29:08: Error: draw line failed, unknown algorithm: DD, excepted 'DDA' or 'Bresenham'
+2019-10-16 08:29:09: Scale success id:666
+2019-10-16 08:29:11: Save success as output_5.bmp
+2019-10-16 08:29:12: Rotate success id:666
+2019-10-16 08:29:12: Translate success id:666
+2019-10-16 08:29:13: Save success as output_6.bmp
+2019-10-16 08:29:13: reshape w:160 h:100
+2019-10-16 08:29:13: draw Curve success id:
+2019-10-16 08:29:13: ['10', '4', 'Bezier', '28 34 9 86 61 4 129 42']
