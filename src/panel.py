@@ -4,12 +4,10 @@ import threading
 import time
 
 import cv2
-import numpy as np
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-
-from src.graph import *
-from src.interpreter import *
+from graph import *
+from interpreter import *
 
 STDIN = 0
 FILEIN = 1
@@ -66,7 +64,7 @@ class Panel:
             glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB)
             glutInitWindowSize(w, h)
             glutCreateWindow(b"Panel")
-            glutDisplayFunc(self.display)
+            glutDisplayFunc(self.run)
             # glutIdleFunc(self.display)
             glutCloseFunc(self.quitFunc)
             # glutReshapeFunc(self.reshape)
@@ -79,6 +77,7 @@ class Panel:
         else:
             self.width, self.height = w, h
             self.graph.clear()
+            glutReshapeWindow(w, h)
             # glClearColor(1.0, 1.0, 1.0, 1.0)
             # glClear(GL_COLOR_BUFFER_BIT)
 
@@ -88,7 +87,11 @@ class Panel:
         glViewport(0, 0, w, h)
         gluOrtho2D(0, w, 0, h)
 
-    def display(self):
+    def run(self):
+        self.__orderRun()
+        self.__drawGragh()
+
+    def __orderRun(self):
         if self.orders.empty() is False:
             order = self.orders.get()
             retItem = self.orderInterpreter.interpretOrder(order)
@@ -127,7 +130,7 @@ class Panel:
                     algorithm = retItem.args.pop()
                     if algorithm != 'DDA' and algorithm != 'Bresenham':
                         Log(
-                            "Error: draw line failed, unknown algorithm: {algorithm}, excepted 'DDA' or 'Bresenham'".
+                            "Error: draw line failed, unknown algorithm: {algorithm}, expected 'DDA' or 'Bresenham'".
                                 format(algorithm=algorithm))
                     else:
                         self.graph[Id] = Line(list(map(int, retItem.args)), self.brush.color, algorithm)
@@ -143,12 +146,12 @@ class Panel:
                     vertexes = list(map(int, self.numberPattern.findall(vertexesStr)))
                     if algorithm != 'DDA' and algorithm != 'Bresenham':
                         Log(
-                            "Error: draw line failed, unknown algorithm: {algorithm}, excepted 'DDA' or 'Bresenham'".
+                            "Error: draw polygon failed, unknown algorithm: {algorithm}, expected 'DDA' or 'Bresenham'".
                                 format(algorithm=algorithm))
                     elif len(vertexes) != 2 * int(retItem.args[1]):
                         Log(
                             'Error: number of vertexes position args is wrong,expected {expectedNum} got {actualNum}'.
-                                format(expectedNum=len(vertexes), actualNum=2 * int(retItem.args[1])))
+                                format(expectedNum=2 * int(retItem.args[1]), actualNum=len(vertexes)))
                     else:
                         self.graph[Id] = Polygon(list(map(int, retItem.args)), self.brush.color, algorithm, vertexes)
                         Log('draw Polygon success id:{ID}'.format(ID=Id))
@@ -162,9 +165,29 @@ class Panel:
                     Log('draw Ellipsis success id:{ID}'.format(ID=Id))
 
             elif retItem.orderType is Interpreter.CURVE:
-                Log('draw Curve success id:')
-                Log(str(retItem.args))
-                pass
+                # Log(str(retItem.args))
+                Id = retItem.args[0]
+                if Id in self.graph:
+                    Log('Error: draw curve failed, ID:{ID} exist'.format(ID=Id))
+                else:
+                    vertexesStr = retItem.args.pop()
+                    algorithm = retItem.args.pop()
+                    verNum = int(retItem.args[1])
+                    vertexes = list(map(int, self.numberPattern.findall(vertexesStr)))
+                    if algorithm != 'Bezier' and algorithm != 'B-spline':
+                        Log(
+                            "Error: draw curve failed, unknown algorithm: {algorithm}, expected 'Bezier' or 'B-spline'".
+                                format(algorithm=algorithm))
+                    elif verNum < 2:
+                        Log("Error: draw curve failed, at least 3 points, got {verNum}".format(verNum=verNum))
+                    elif len(vertexes) != 2 * int(retItem.args[1]):
+                        Log(
+                            'Error: number of vertexes position args is wrong,expected {expectedNum} got {actualNum}'.
+                                format(expectedNum=2 * int(retItem.args[1]), actualNum=len(vertexes)))
+                    else:
+                        self.graph[Id] = Curve(list(map(int, retItem.args)), self.brush.color, algorithm, vertexes)
+                        Log('draw Curve success id:{ID}'.format(ID=Id))
+
             elif retItem.orderType is Interpreter.TRANSLATE:
                 # Log(str(retItem.args))
                 Id = retItem.args[0]
@@ -178,7 +201,7 @@ class Panel:
                 # Log(str(retItem.args))
                 Id = retItem.args[0]
                 if Id not in self.graph:
-                    Log("Error: translate failed,ID:{ID} don't exist".format(ID=Id))
+                    Log("Error: rotate failed,ID:{ID} don't exist".format(ID=Id))
                 else:
                     centerX, centerY, theta = map(int, retItem.args[1:4])
                     self.graph[Id].rotate(centerX, centerY, theta)
@@ -187,17 +210,34 @@ class Panel:
                 # Log(str(retItem.args))
                 Id = retItem.args[0]
                 if Id not in self.graph:
-                    Log("Error: translate failed,ID:{ID} don't exist".format(ID=Id))
+                    Log("Error: scale failed,ID:{ID} don't exist".format(ID=Id))
                 else:
                     centerX, centerY = map(int, retItem.args[1:3])
                     scale = float(retItem.args[3])
                     self.graph[Id].scale(centerX, centerY, scale)
                     Log('Scale success id:{ID}'.format(ID=Id))
             elif retItem.orderType is Interpreter.CLIP:
-                Log('clip success id:')
-                Log(str(retItem.args))
-                pass
+                # Log(str(retItem.args))
+                Id = retItem.args[0]
+                if Id not in self.graph:
+                    Log("Error: clip failed,ID:{ID} don't exist".format(ID=Id))
+                elif self.graph[Id].graphType is not Graph.LINE:
+                    Log("Error: clip graph (ID:{ID}) type is wrong, expected Line but got {className}".
+                        format(ID=Id, className=self.graph[Id].__class__.__name__))
+                else:
+                    algorithm = retItem.args.pop()
+                    if algorithm != 'Cohen-Sutherland' and algorithm != 'Liang-Barsky':
+                        Log(
+                            "Error: clip line failed, unknown algorithm: {algorithm}, "
+                            "expected 'Cohen-Sutherland' or 'Liang-Barsky'".
+                                format(algorithm=algorithm))
+                    else:
+                        x1, y1, x2, y2 = list(map(int, retItem.args[1:5]))
+                        if self.graph[Id].clip(x1, y1, x2, y2, algorithm) is False:
+                            self.graph.pop(Id)
+                        Log("Clip success, id:{ID}".format(ID=Id))
 
+    def __drawGragh(self):
         glPushMatrix()
         glClearColor(1.0, 1.0, 1.0, 1.0)
         glClear(GL_COLOR_BUFFER_BIT)
@@ -222,7 +262,7 @@ class Panel:
                 if order != '':
                     self.orders.put(order)
             elif order_mod == FILEIN:
-                ordersList = self.f.readlines()
+                ordersList = self.f.read().splitlines()
                 for order in ordersList:
                     self.orders.put(order)
                 reading = False

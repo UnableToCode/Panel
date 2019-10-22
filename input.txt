@@ -9,23 +9,31 @@ setColor 0 162 232
 drawLine 233 96 35 15 58 Bresenham
 saveCanvas output_2
 clip 5 33 10 70 58 Cohen-Sutherland
+clip 233 30 40 80 50 Liang-Barsky
+clip 233 30 40 80 50 DDA
 saveCanvas output_3
 rotate 5 33 49 90
 saveCanvas output_4
 drawEllipse 123 31 49 8 18
+clip 123 33 10 70 58 Cohen-Sutherland
+saveCanvas output_5
 rotate 123 10 10 -30
 scale 123 10 10 1.3
+saveCanvas output_6
 setColor 0 0 0
 drawPolygon 666 6 DDA 44 22 73 30 74 77 59 56 32 63 25 49
 drawPolygon 667 7 DDA 44 22 73 30 74 77 59 56 32 63 25 49
 drawPolygon 668 6 DD 44 22 73 30 74 77 59 56 32 63 25 49
+saveCanvas output_7
 scale 666 44 22 1.5
-saveCanvas output_5
 rotate 666 59 56 -90
 translate 666 -8 -18
-saveCanvas output_6
+saveCanvas output_8
 resetCanvas 160 100
 drawCurve 10 4 Bezier 28 34 9 86 61 4 129 42
 setColor 0 255 0
 drawCurve 11 4 Bezier 114 88 60 92 99 3 42 24
-saveCanvas output_7
+saveCanvas output_9
+setColor 0 0 255
+drawCurve 9 4 B-spline 20 25 60 75 100 25 140 75
+saveCanvas output_10
