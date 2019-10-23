@@ -44,6 +44,7 @@ class Line(Graph):
         yBegin, yEnd = self.vertexes[0].y, self.vertexes[1].y
 
         if self.algorithm == 'DDA':
+            # 取距离长的方向步进
             k = max(abs(xEnd - xBegin), abs(yEnd - yBegin))
             dx = (xEnd - xBegin) / k
             dy = (yEnd - yBegin) / k
@@ -55,13 +56,16 @@ class Line(Graph):
                 y += dy
 
         elif self.algorithm == 'Bresenham':
+            # 如果斜率大于1，则交换x,y方向，目的是取距离大的方向步进，
             revers = abs(yEnd - yBegin) > abs(xEnd - xBegin)
             if revers is True:
                 xBegin, yBegin = yBegin, xBegin
                 xEnd, yEnd = yEnd, xEnd
+            # 从坐标值小的点像坐标值大的点步进
             if xEnd < xBegin:
                 xBegin, xEnd = xEnd, xBegin
                 yBegin, yEnd = yEnd, yBegin
+            # 处理斜率正负情况下的步进方向
             if yBegin < yEnd:
                 step = 1
             else:
@@ -125,11 +129,14 @@ class Line(Graph):
             codeAnd = lineCode[0] & lineCode[1]
             codeOr = lineCode[0] | lineCode[1]
 
+            # 整条线段在剪裁框外
             if codeAnd != 0:
                 return False
+            # 整条线段在剪裁框内
             elif codeOr == 0:
                 return True
             else:
+                # 有一点在yMin下方
                 if codeOr & 1 != 0:
                     yNew = self.vertexes[0].y + (xMin - self.vertexes[0].x) * (
                             self.vertexes[1].y - self.vertexes[0].y) / (self.vertexes[1].x - self.vertexes[0].x)
@@ -137,6 +144,7 @@ class Line(Graph):
                         self.vertexes[0].x, self.vertexes[0].y = xMin, yNew
                     elif self.vertexes[1].x < xMin:
                         self.vertexes[1].x, self.vertexes[1].y = xMin, yNew
+                # 有一点在yMax上方
                 if codeOr & 1 << 1 != 0:
                     yNew = self.vertexes[0].y + (xMax - self.vertexes[0].x) * (
                             self.vertexes[1].y - self.vertexes[0].y) / (self.vertexes[1].x - self.vertexes[0].x)
@@ -144,6 +152,7 @@ class Line(Graph):
                         self.vertexes[0].x, self.vertexes[0].y = xMax, yNew
                     elif self.vertexes[1].x > xMax:
                         self.vertexes[1].x, self.vertexes[1].y = xMax, yNew
+                # 有一点在xMin左方
                 if codeOr & 1 << 2 != 0:
                     xNew = self.vertexes[0].x + (yMin - self.vertexes[0].y) / (
                             self.vertexes[1].y - self.vertexes[0].y) * (self.vertexes[1].x - self.vertexes[0].x)
@@ -151,6 +160,7 @@ class Line(Graph):
                         self.vertexes[0].x, self.vertexes[0].y = xNew, yMin
                     elif self.vertexes[1].y < yMin:
                         self.vertexes[1].x, self.vertexes[1].y = xNew, yMin
+                # 有一点在xMax右方
                 if codeOr & 1 << 3 != 0:
                     xNew = self.vertexes[0].x + (yMax - self.vertexes[0].y) / (
                             self.vertexes[1].y - self.vertexes[0].y) * (self.vertexes[1].x - self.vertexes[0].x)
@@ -159,6 +169,7 @@ class Line(Graph):
                     elif self.vertexes[1].y > yMax:
                         self.vertexes[1].x, self.vertexes[1].y = xNew, yMax
 
+                # 将计算可能产生的小数坐标转整数
                 self.vertexes = list(map(lambda vertex: Graph.Point(int(vertex.x), int(vertex.y)), self.vertexes))
                 return True
 
@@ -261,11 +272,10 @@ class Ellipsis(Graph):
         while bb * dx < aa * dy:
             if d < 0:
                 d += bb * (2 * dx + 3)
-                dx += 1
             else:
                 d += bb * (2 * dx + 3) + aa * (-2 * dy + 2)
-                dx += 1
                 dy -= 1
+            dx += 1
             self.__symmetryPix(dx, dy)
 
         d = int(bb * (dx + 0.5) ** 2 + aa * (dy - 1) ** 2 - aa * bb + 0.5)
@@ -274,11 +284,10 @@ class Ellipsis(Graph):
         while dy > 0:
             if d > 0:
                 d += aa * (-2 * dy + 2)
-                dy -= 1
             else:
                 d += bb * (2 * dx + 3) + aa * (-2 * dy + 2)
                 dx += 1
-                dy -= 1
+            dy -= 1
             self.__symmetryPix(dx, dy)
 
     def translate(self, dx, dy):
@@ -323,7 +332,7 @@ class Curve(Graph):
 
         elif self.algorithm == 'B-spline':
             k = 3
-            N = np.linspace(1, 10, n + k + 1)
+            N = np.linspace(0, 1, n + k + 1)
 
             def deBoorX(r, u, i):
                 if r == 0:
