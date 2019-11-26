@@ -2,7 +2,8 @@ import abc
 from math import *
 
 import numpy as np
-from OpenGL.GL import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from scipy.special import comb
 
 
@@ -15,7 +16,7 @@ class Graph:
             self.y = y
 
     @abc.abstractmethod
-    def draw(self): pass
+    def draw(self, painter): pass
 
     @abc.abstractmethod
     def translate(self, dx, dy): pass
@@ -27,7 +28,7 @@ class Graph:
     def scale(self, centerX, centerY, scale): pass
 
 
-class Line(Graph):
+class MyLine(Graph):
     def __init__(self, args, color, algorithm):
         self.graphType = Graph.LINE
         self.ID, x1, y1, x2, y2 = args
@@ -37,11 +38,13 @@ class Line(Graph):
         self.color = color
         self.algorithm = algorithm
 
-    def draw(self):
-        r, g, b = self.color
-        glColor3f(r, g, b)
+    def draw(self, painter):
+
         xBegin, xEnd = self.vertexes[0].x, self.vertexes[1].x
         yBegin, yEnd = self.vertexes[0].y, self.vertexes[1].y
+
+        pen = QPen(QColor(self.color), 2, Qt.SolidLine)
+        painter.setPen(pen)
 
         if self.algorithm == 'DDA':
             # 取距离长的方向步进
@@ -51,7 +54,7 @@ class Line(Graph):
             x = xBegin
             y = yBegin
             for i in range(k):
-                glVertex2f(x, y)
+                painter.drawPoint(QPointF(x, y))
                 x += dx
                 y += dy
 
@@ -86,9 +89,9 @@ class Line(Graph):
                     p += twoDyMinuDx
                 x += 1
                 if revers is True:
-                    glVertex2f(y, x)
+                    painter.drawPoint(QPointF(y, x))
                 else:
-                    glVertex2f(x, y)
+                    painter.drawPoint(QPointF(x, y))
 
     def translate(self, dx, dy):
         for vertex in self.vertexes:
@@ -170,7 +173,7 @@ class Line(Graph):
                         self.vertexes[1].x, self.vertexes[1].y = xNew, yMax
 
                 # 将计算可能产生的小数坐标转整数
-                self.vertexes = list(map(lambda vertex: Graph.Point(int(vertex.x), int(vertex.y)), self.vertexes))
+                self.vertexes = list(map(lambda _vertex: Graph.Point(int(_vertex.x), int(_vertex.y)), self.vertexes))
                 return True
 
         elif algorithm == 'Liang-Barsky':
@@ -189,11 +192,11 @@ class Line(Graph):
             q[2] = self.vertexes[0].y - yMin
             q[3] = yMax - self.vertexes[0].y
 
-            for pi, qi in zip(p, q):
-                r = qi / pi
-                if pi < 0:
+            for _pi, qi in zip(p, q):
+                r = qi / _pi
+                if _pi < 0:
                     uMin = max(uMin, r)
-                elif pi > 0:
+                elif _pi > 0:
                     uMax = min(uMax, r)
                 elif qi < 0:
                     return False
@@ -209,7 +212,7 @@ class Line(Graph):
             return True
 
 
-class Polygon(Graph):
+class MyPolygon(Graph):
     def __init__(self, args, color, algorithm, vertexes):
         self.graphType = Graph.POLYGON
         self.ID, self.verNum = args
@@ -221,11 +224,11 @@ class Polygon(Graph):
         vertexes += vertexes[:2]
         for i in range(self.verNum):
             # print(vertexes[i:i + 4])
-            self.lines.append(Line([i] + vertexes[2 * i:2 * i + 4], color, algorithm))
+            self.lines.append(MyLine([i] + vertexes[2 * i:2 * i + 4], color, algorithm))
 
-    def draw(self):
+    def draw(self, painter):
         for line in self.lines:
-            line.draw()
+            line.draw(painter)
 
     def translate(self, dx, dy):
         for line in self.lines:
@@ -240,7 +243,7 @@ class Polygon(Graph):
             line.scale(centerX, centerY, scale)
 
 
-class Ellipsis(Graph):
+class MyEllipsis(Graph):
     def __init__(self, args, color):
         self.graphType = Graph.ELLIPSIS
         self.ID, x, y, self.a, self.b = args
@@ -248,22 +251,23 @@ class Ellipsis(Graph):
         self.color = color
         self.rotateTheta = 0
 
-    def __symmetryPix(self, dx, dy):
-        self.__drawPix(self.center.x + dx, self.center.y + dy)
-        self.__drawPix(self.center.x + dx, self.center.y - dy)
-        self.__drawPix(self.center.x - dx, self.center.y + dy)
-        self.__drawPix(self.center.x - dx, self.center.y - dy)
+    def __symmetryPix(self, painter, dx, dy):
+        self.__drawPix(painter, self.center.x + dx, self.center.y + dy)
+        self.__drawPix(painter, self.center.x + dx, self.center.y - dy)
+        self.__drawPix(painter, self.center.x - dx, self.center.y + dy)
+        self.__drawPix(painter, self.center.x - dx, self.center.y - dy)
 
-    def __drawPix(self, x, y):
+    def __drawPix(self, painter, x, y):
         theta = radians(self.rotateTheta)
         originX, originY = x, y
         x = (originX - self.center.x) * cos(theta) - (originY - self.center.y) * sin(theta) + self.center.x
         y = (originX - self.center.x) * sin(theta) + (originY - self.center.y) * cos(theta) + self.center.y
-        glVertex2f(x, y)
+        painter.drawPoint(QPointF(x, y))
 
-    def draw(self):
-        r, g, b = self.color
-        glColor3f(r, g, b)
+    def draw(self, painter):
+        pen = QPen(QColor(self.color), 2, Qt.SolidLine)
+        painter.setPen(pen)
+
         aa, bb = self.a ** 2, self.b ** 2
         dx, dy = 0, self.b
         d = int(bb + aa * (-self.b + 0.25) + 0.5)
@@ -276,7 +280,7 @@ class Ellipsis(Graph):
                 d += bb * (2 * dx + 3) + aa * (-2 * dy + 2)
                 dy -= 1
             dx += 1
-            self.__symmetryPix(dx, dy)
+            self.__symmetryPix(painter, dx, dy)
 
         d = int(bb * (dx + 0.5) ** 2 + aa * (dy - 1) ** 2 - aa * bb + 0.5)
 
@@ -288,7 +292,7 @@ class Ellipsis(Graph):
                 d += bb * (2 * dx + 3) + aa * (-2 * dy + 2)
                 dx += 1
             dy -= 1
-            self.__symmetryPix(dx, dy)
+            self.__symmetryPix(painter, dx, dy)
 
     def translate(self, dx, dy):
         self.center.x += dx
@@ -318,9 +322,9 @@ class Curve(Graph):
         for i in range(self.verNum):
             self.vertexes.append(Graph.Point(vertexes[2 * i], vertexes[2 * i + 1]))
 
-    def draw(self):
-        r, g, b = self.color
-        glColor3f(r, g, b)
+    def draw(self, painter):
+        pen = QPen(QColor(self.color), 2, Qt.SolidLine)
+        painter.setPen(pen)
         n = self.verNum - 1
         if self.algorithm == 'Bezier':
             for t in np.linspace(0, 1, 1000):
@@ -328,7 +332,7 @@ class Curve(Graph):
                 for i, vertex in zip(range(self.verNum), self.vertexes):
                     x += comb(n, i) * vertex.x * ((1 - t) ** (n - i)) * (t ** i)
                     y += comb(n, i) * vertex.y * ((1 - t) ** (n - i)) * (t ** i)
-                glVertex2f(x, y)
+                painter.drawPoint(QPointF(x, y))
 
         elif self.algorithm == 'B-spline':
             k = 3
@@ -366,7 +370,7 @@ class Curve(Graph):
                 for u in np.linspace(N[i], N[i + 1]):
                     x = deBoorX(k - 1, u, i)
                     y = deBoorY(k - 1, u, i)
-                    glVertex2f(x, y)
+                    painter.drawPoint(QPointF(x, y))
 
     def translate(self, dx, dy):
         for vertex in self.vertexes:

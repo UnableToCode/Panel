@@ -34,22 +34,22 @@ scale id(int) x0(int) y0(int) scale(float) 缩放图元，参数为id，缩放�
 clip id(int) x0(int) y0(int) x1(int) y1(int) algorithm(str) 剪裁线段，参数为id，剪裁框对角线上两个点的坐标对，算法  
 ## 运行结果展示
 画线 DDA  
-![avatar](./pic/output_1.bmp)  
+![DDA](./pic/output_1.bmp)  
 画线 Bresenham  
-![avatar](./pic/output_2.bmp)  
+![Bresenham](./pic/output_2.bmp)  
 剪裁 红线Cohen-Sutherland 蓝线Liang-Barsky  
-![avatar](./pic/output_3.bmp)  
+![clip](./pic/output_3.bmp)  
 旋转红线  
-![avatar](./pic/output_4.bmp)  
+![rotate](./pic/output_4.bmp)  
 画椭圆  
-![avatar](./pic/output_5.bmp)  
+![Ellipse](./pic/output_5.bmp)  
 旋转并缩放椭圆  
-![avatar](./pic/output_6.bmp)  
+![scale](./pic/output_6.bmp)  
 画多边形  
-![avatar](./pic/output_7.bmp)  
+![Polygon](./pic/output_7.bmp)  
 旋转缩放平移多边形  
-![avatar](./pic/output_8.bmp)  
+![translate](./pic/output_8.bmp)  
 画曲线Bezier    
-![avatar](./pic/output_9.bmp)  
+![Bezier](./pic/output_9.bmp)  
 画曲线B-spline（蓝线）  
-![avatar](./pic/output_10.bmp)   
+![B-spline](./pic/output_10.bmp)   
