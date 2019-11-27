@@ -36,6 +36,7 @@ class MainWindow(QMainWindow):
         self.quitBtn.setIcon(quitIcon)
         self.quitBtn.setIconSize(QSize(20, 20))
         self.quitBtn.setText("")
+        self.quitBtn.setCursor(Qt.PointingHandCursor)
         self.quitBtn.clicked.connect(self.slotOnQuitClick)
 
         self.hideBtn.setGeometry(self.width() - 50, 0, 20, 20)
@@ -44,6 +45,7 @@ class MainWindow(QMainWindow):
         self.hideBtn.setIcon(hideIcon)
         self.hideBtn.setIconSize(QSize(20, 20))
         self.hideBtn.setText("")
+        self.hideBtn.setCursor(Qt.PointingHandCursor)
         self.hideBtn.clicked.connect(self.showMinimized)
 
         # set btn geometry

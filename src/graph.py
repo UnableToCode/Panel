@@ -312,7 +312,7 @@ class MyEllipsis(Graph):
         self.b *= scale
 
 
-class Curve(Graph):
+class MyCurve(Graph):
     def __init__(self, args, color, algorithm, vertexes):
         self.graphType = Graph.CURVE
         self.ID, self.verNum = args

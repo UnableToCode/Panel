@@ -231,7 +231,7 @@ class FilePanelWidget(PanelWidget):
                                           'expected {expectedNum} got {actualNum}'.
                                           format(expectedNum=2 * int(retItem.args[1]), actualNum=len(vertexes)))
                     else:
-                        self.graph[Id] = Curve(list(map(int, retItem.args)), self.pen.color(), algorithm, vertexes)
+                        self.graph[Id] = MyCurve(list(map(int, retItem.args)), self.pen.color(), algorithm, vertexes)
                         self.logger.info('draw Curve success id:{ID}'.format(ID=Id))
 
             elif retItem.orderType is Interpreter.TRANSLATE:
