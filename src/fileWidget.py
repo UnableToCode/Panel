@@ -46,8 +46,8 @@ class FileWidget(QDialog):
         self.filePathInput.resize(270, 20)
         self.filePathInput.move(110, 20)
         # TEST
-        filePath = 'H:/PycharmProjects/CG_exp/input.txt'
-        self.filePathInput.setText(filePath)
+        # filePath = 'H:/PycharmProjects/CG_exp/input.txt'
+        # self.filePathInput.setText(filePath)
 
         self.logText.resize(360, 200)
         self.logText.move(20, 50)

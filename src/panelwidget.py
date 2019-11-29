@@ -1,7 +1,7 @@
 import datetime
+import logging
 import queue
 
-from OpenGL.GLUT import *
 from PyQt5.QtWidgets import *
 
 from src.graph import *
