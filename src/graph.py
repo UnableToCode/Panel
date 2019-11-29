@@ -9,6 +9,7 @@ from scipy.special import comb
 
 class Graph:
     LINE, POLYGON, ELLIPSIS, CURVE = range(4)
+    PANEL_WIDTH, PANEL_HEIGHT = 0, 0
 
     class Point:
         def __init__(self, x, y):
@@ -49,6 +50,8 @@ class MyLine(Graph):
         if self.algorithm == 'DDA':
             # 取距离长的方向步进
             k = max(abs(xEnd - xBegin), abs(yEnd - yBegin))
+            if k == 0:
+                k = 1
             dx = (xEnd - xBegin) / k
             dy = (yEnd - yBegin) / k
             x = xBegin
@@ -326,8 +329,10 @@ class MyCurve(Graph):
         pen = QPen(QColor(self.color), 2, Qt.SolidLine)
         painter.setPen(pen)
         n = self.verNum - 1
+        pointNum = (Graph.PANEL_WIDTH + Graph.PANEL_HEIGHT) * 2
+
         if self.algorithm == 'Bezier':
-            for t in np.linspace(0, 1, 1000):
+            for t in np.linspace(0, 1, pointNum):
                 x, y = 0, 0
                 for i, vertex in zip(range(self.verNum), self.vertexes):
                     x += comb(n, i) * vertex.x * ((1 - t) ** (n - i)) * (t ** i)
@@ -367,7 +372,7 @@ class MyCurve(Graph):
                     return a * deBoorY(r - 1, u, i) + b * deBoorY(r - 1, u, i - 1)
 
             for i in range(k - 1, n + 1):
-                for u in np.linspace(N[i], N[i + 1]):
+                for u in np.linspace(N[i], N[i + 1], pointNum // len(N)):
                     x = deBoorX(k - 1, u, i)
                     y = deBoorY(k - 1, u, i)
                     painter.drawPoint(QPointF(x, y))

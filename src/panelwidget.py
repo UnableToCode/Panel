@@ -62,6 +62,7 @@ class PanelWidget(QWidget):
         self.panelLabel.setGeometry(0, 0, self.width(), self.height())
         self.panel.fill(Qt.white)
         self.panelLabel.setPixmap(self.panel)
+        self.logger.info('init UI success')
         self.show()
 
     def putOnCenter(self):
@@ -73,16 +74,13 @@ class PanelWidget(QWidget):
     def reset(self, w, h):
         pass
 
-    def fileModRun(self):
-        self.__orderRun()
-        self.__drawGragh()
-
-    def drawGragh(self):
+    def drawGraph(self):
         self.panel.fill(Qt.white)
         painter = QPainter(self.panel)
-        for gragh in self.graph.values():
-            gragh.draw(painter)
+        for graph in self.graph.values():
+            graph.draw(painter)
         self.panelLabel.setPixmap(self.panel)
+        self.logger.info('refreshed panel')
 
     # def paintGL(self):
     #     glPushMatrix()
@@ -122,6 +120,7 @@ class FilePanelWidget(PanelWidget):
             self.logger.error('width or height out if range, width >= 100, height <= 1000, w:{w} h:{h}'
                               .format(w=w, h=h))
         else:
+            Graph.PANEL_WIDTH, Graph.PANEL_HEIGHT = w, h
             self.setGeometry(0, 0, w, h)
             self.putOnCenter()
             self.panel = QPixmap(w, h)
@@ -129,7 +128,7 @@ class FilePanelWidget(PanelWidget):
             self.graph.clear()
             self.panelLabel.setGeometry(0, 0, w, h)
             self.panelLabel.setPixmap(self.panel)
-
+            self.logger.info('reset panel success, w:{w} h:{h}'.format(w=w, h=h))
             # glClearColor(1.0, 1.0, 1.0, 1.0)
             # glClear(GL_COLOR_BUFFER_BIT)
 
@@ -138,12 +137,13 @@ class FilePanelWidget(PanelWidget):
         for order in ordersList:
             self.orders.put(order)
         self.runningFlag = True
+        self.logger.info('get orders success')
 
     def run(self):
         self.__getOrders()
         while self.runningFlag:
             self.__orderRun()
-            super().drawGragh()
+            super().drawGraph()
 
     def __orderRun(self):
         if self.orders.empty() is False:
