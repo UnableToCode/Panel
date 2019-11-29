@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         self.newPanelBtn.resize(150, 50)
         self.newPanelBtn.move((self.width() - self.newPanelBtn.width()) / 2,
                               (self.height() / 2 - self.newPanelBtn.height()) / 2)
-        self.newPanelBtn.setText("New Panel")
+        self.newPanelBtn.setText("New Palette")
         self.newPanelBtn.clicked.connect(self.slotNewPanelBtn)
 
         self.fileReadBtn.resize(150, 50)

@@ -4,26 +4,28 @@ JetBrains PyCharm
 python版本 3.6.6
 #### python包版本
 （已提供requirements.txt）  
-scipy==1.0.0  
 numpy==1.17.2  
-opencv_python==3.4.0.12  
-PyOpenGL==3.1.0  
+scipy==1.0.0  
+PyQt5==5.13.2
+
 #### 使用方法
-修改panel.py中的order_mod和out_mode可以改变输入和输出方式  
-FILEIN 文件输入，会读取根目录下的input.txt文件逐行执行指令  
-STDIN 控制台输入，根据控制台的input order提示输入指令并执行  
-FILEOUT文件输出，log会输出到根目录下的log.log文件中  
-STDOUT 控制台输出，log会输出到控制台  
-PyCharm 导入项目并安装requirements.txt后运行panel.py即可，每单击一次画布会执行一条input.txt中或通过控制台输入的的指令  
-若无PyCharm，根目录下通过pip install -r requirements.txt 安装环境，之后进入src文件夹使用python3 panel.py运行程序  
+因为一些文件import的路径导入问题，直接python3运行可能会报错，所以强烈建议使用PyCharm导入项目运行。  
+PyCharm 导入项目并安装requirements.txt后运行mainWidget.py即可，根据按钮提示进行操作即可  
+bin文件夹中提供了打包好的可执行exe文件，但由于一些pyinstaller打包时不会打包PyQt5库文件的问题，极大概率在其他环境下无法使用，所以建议还是PyCharm导入文件安装PyQt5运行源码  
 ## 文件说明
 graph.py 定义图元类，定义图元属性，实现各种图元处理算法  
 interpreter.py 指令解释器，识别指令合法性，返回指令类型和指令参数  
-panel.py 维护画布对象，负责处理指令解释器返回的Item，根据返回的指令类型和参数执行对应功能
-## 指令说明
+mainWidget.py 启动程序时的主界面类，同时也是程序入口  
+panelWidget.py 包含两个类，一个是画布界面的基类，维护画布对象，另一个是针对文件指令执行时显示的画布派生类，负责处理指令解释器返回的Item，根据返回的指令类型和参数执行对应功能  
+fileWidget.py 选择文件输入时的界面，提供选择执行文件，输出log，传递信号给画布的功能  
+paletteWidget.py 实时画布类，提供功能选择按钮，画布和各种功能对话框的维护。  
+## 文件输入指令说明
+指令文件保存为.txt文件，在文件输入界面时通过点击Choose File按钮弹出文件选择对话框进行选择，另外也可以手动输入，但输入的不为txt文件或输入的文件路径不存在时会显示错误消息提示框  
+一行一条指令，若一行为非法指令，会跳过执行下一行  
+合法指令即参数类型：  
 resetCanvas weight(int) height(int) 清空画布并重置画布宽高  
 setColor r(int) g(int) b(int) 设置画笔颜色为r,g,b  
-saveCanvas filename(str) 图像保存为filename文件  
+saveCanvas filename(str) 图像保存为filename.bmp文件  
 drawLine id(int) x1(int) y1(int) x2(int) y2(int) algorithm(str) 画线，参数为图元id，起始点坐标，终点坐标，使用算法  
 drawPolygon id(int) n(int) algorithm(str) 2n个(int)  画多边形，参数为id，顶点数，算法，顶点坐标对
 drawEllipse id(int) x0(int) y0(int) xr(int) yr(int) 画椭圆，参数为id，圆心坐标，长短轴长  
@@ -32,24 +34,15 @@ translate id(int) dx(int) dy(int) 平移图元，参数为id，x，y方向上的
 rotate id(int) x0(int) y0(int) theta(int) 旋转图元，参数为id，旋转中心，旋转角度（正为顺时针，负为逆时针）  
 scale id(int) x0(int) y0(int) scale(float) 缩放图元，参数为id，缩放中心，缩放倍数    
 clip id(int) x0(int) y0(int) x1(int) y1(int) algorithm(str) 剪裁线段，参数为id，剪裁框对角线上两个点的坐标对，算法  
-## 运行结果展示
-画线 DDA  
-![DDA](./pic/output_1.bmp)  
-画线 Bresenham  
-![Bresenham](./pic/output_2.bmp)  
-剪裁 红线Cohen-Sutherland 蓝线Liang-Barsky  
-![clip](./pic/output_3.bmp)  
-旋转红线  
-![rotate](./pic/output_4.bmp)  
-画椭圆  
-![Ellipse](./pic/output_5.bmp)  
-旋转并缩放椭圆  
-![scale](./pic/output_6.bmp)  
-画多边形  
-![Polygon](./pic/output_7.bmp)  
-旋转缩放平移多边形  
-![translate](./pic/output_8.bmp)  
-画曲线Bezier    
-![Bezier](./pic/output_9.bmp)  
-画曲线B-spline（蓝线）  
-![B-spline](./pic/output_10.bmp)   
+## 实时画板使用说明
+点击按钮选择功能，输入参数不合法时会弹出警告窗口  
+需要注意的是，画线，画多边形，画曲线，线段剪裁会弹出算法选择窗口，需要选择算法后才会开始画线/剪裁  
+开始画图或图元变换时会将鼠标置于画板中间，画图或图元变换过程中鼠标会限制在画板内，但由于pyQt无法调用windowsAPI，此限制功能是通过重写鼠标移动事件实现，当鼠标移动过快时仍有可能会导致鼠标移出画板  
+进行图元变换操作（平移，旋转，缩放，剪裁）时会弹出选择框（见下面 界面展示 部分）先从左边列表选择要处理的图元，选择时右边会显示图元的缩略图，然后点击确定后进入图元变换转态  
+画直线/ 椭圆/ 直线剪裁时通过鼠标左键点击两次确定直线的两个端点/ 画椭圆的范围(在两点间的矩形框内画椭圆，与矩形边相切)/ 剪裁的框(通过两点确定一个矩形框)  
+画多边形/曲线时通过多次点击左键确定控制点，点击右键结束选择退出绘制状态  
+平移时点击任意位置拖动即可，拖动方向和距离与鼠标移动一致  
+旋转/ 缩放会选择鼠标左键点击的位置为旋转/ 缩放中心，保持点击鼠标向左右拖动为逆正时针旋转 / 变小放大缩放， 可多次点击左键鼠标拖动处理，点击右键确定本次操作，退出绘制状态   
+在任何绘制/ 图元变换状态下按ESC可以退出当前状态，取消本次操作  
+绘制多边形时会自动将最后一点与起始点相连（在绘图时图元的实时显示也很明显）  
+另外应为曲线的计算量过大，绘制曲线时实时显示曲线会导致一定程度的掉帧，程序变卡，并且曲线越多，曲线占用面积越大越明显  

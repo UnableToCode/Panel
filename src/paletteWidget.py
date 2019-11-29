@@ -6,7 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from src.graph import Graph, MyLine, MyPolygon, MyEllipsis, MyCurve
-from src.panelwidget import PanelWidget
+from src.panelWidget import PanelWidget
 
 
 class PaletteWidget(PanelWidget):

@@ -2,7 +2,7 @@ import os
 
 from PyQt5.QtWidgets import *
 
-from src.panelwidget import FilePanelWidget, logging
+from src.panelWidget import FilePanelWidget, logging
 
 
 class FileWidget(QDialog):
