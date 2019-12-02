@@ -120,64 +120,66 @@ class MyLine(Graph):
         yMax = max(y1, y2)
         if algorithm == 'Cohen-Sutherland':
             lineCode = list()
-            for vertex in self.vertexes:
-                code = 0
-                if vertex.x < xMin:
-                    code |= 1
-                if vertex.x > xMax:
-                    code |= 1 << 1
-                if vertex.y < yMin:
-                    code |= 1 << 2
-                if vertex.y > yMax:
-                    code |= 1 << 3
-                lineCode.append(code)
+            while True:
+                lineCode.clear()
+                for vertex in self.vertexes:
+                    code = 0
+                    if vertex.x < xMin:
+                        code |= 1
+                    if vertex.x > xMax:
+                        code |= 1 << 1
+                    if vertex.y < yMin:
+                        code |= 1 << 2
+                    if vertex.y > yMax:
+                        code |= 1 << 3
+                    lineCode.append(code)
 
-            codeAnd = lineCode[0] & lineCode[1]
-            codeOr = lineCode[0] | lineCode[1]
+                codeAnd = lineCode[0] & lineCode[1]
+                codeOr = lineCode[0] | lineCode[1]
 
-            # 整条线段在剪裁框外
-            if codeAnd != 0:
-                return False
-            # 整条线段在剪裁框内
-            elif codeOr == 0:
-                return True
-            else:
-                # 有一点在yMin下方
-                if codeOr & 1 != 0:
-                    yNew = self.vertexes[0].y + (xMin - self.vertexes[0].x) * (
-                            self.vertexes[1].y - self.vertexes[0].y) / (self.vertexes[1].x - self.vertexes[0].x)
-                    if self.vertexes[0].x < xMin:
-                        self.vertexes[0].x, self.vertexes[0].y = xMin, yNew
-                    elif self.vertexes[1].x < xMin:
-                        self.vertexes[1].x, self.vertexes[1].y = xMin, yNew
-                # 有一点在yMax上方
-                if codeOr & 1 << 1 != 0:
-                    yNew = self.vertexes[0].y + (xMax - self.vertexes[0].x) * (
-                            self.vertexes[1].y - self.vertexes[0].y) / (self.vertexes[1].x - self.vertexes[0].x)
-                    if self.vertexes[0].x > xMax:
-                        self.vertexes[0].x, self.vertexes[0].y = xMax, yNew
-                    elif self.vertexes[1].x > xMax:
-                        self.vertexes[1].x, self.vertexes[1].y = xMax, yNew
-                # 有一点在xMin左方
-                if codeOr & 1 << 2 != 0:
-                    xNew = self.vertexes[0].x + (yMin - self.vertexes[0].y) / (
-                            self.vertexes[1].y - self.vertexes[0].y) * (self.vertexes[1].x - self.vertexes[0].x)
-                    if self.vertexes[0].y < yMin:
-                        self.vertexes[0].x, self.vertexes[0].y = xNew, yMin
-                    elif self.vertexes[1].y < yMin:
-                        self.vertexes[1].x, self.vertexes[1].y = xNew, yMin
-                # 有一点在xMax右方
-                if codeOr & 1 << 3 != 0:
-                    xNew = self.vertexes[0].x + (yMax - self.vertexes[0].y) / (
-                            self.vertexes[1].y - self.vertexes[0].y) * (self.vertexes[1].x - self.vertexes[0].x)
-                    if self.vertexes[0].y > yMax:
-                        self.vertexes[0].x, self.vertexes[0].y = xNew, yMax
-                    elif self.vertexes[1].y > yMax:
-                        self.vertexes[1].x, self.vertexes[1].y = xNew, yMax
+                # 整条线段在剪裁框外
+                if codeAnd != 0:
+                    return False
+                # 整条线段在剪裁框内
+                elif codeOr == 0:
+                    return True
+                else:
+                    # 有一点在xMin左方
+                    if codeOr & 1 != 0:
+                        yNew = self.vertexes[0].y + (xMin - self.vertexes[0].x) * (
+                                self.vertexes[1].y - self.vertexes[0].y) / (self.vertexes[1].x - self.vertexes[0].x)
+                        if self.vertexes[0].x < xMin:
+                            self.vertexes[0].x, self.vertexes[0].y = xMin, yNew
+                        elif self.vertexes[1].x < xMin:
+                            self.vertexes[1].x, self.vertexes[1].y = xMin, yNew
+                    # 有一点在xMax右方
+                    elif codeOr & 1 << 1 != 0:
+                        yNew = self.vertexes[0].y + (xMax - self.vertexes[0].x) * (
+                                self.vertexes[1].y - self.vertexes[0].y) / (self.vertexes[1].x - self.vertexes[0].x)
+                        if self.vertexes[0].x > xMax:
+                            self.vertexes[0].x, self.vertexes[0].y = xMax, yNew
+                        elif self.vertexes[1].x > xMax:
+                            self.vertexes[1].x, self.vertexes[1].y = xMax, yNew
+                    # 有一点在yMin上方
+                    elif codeOr & 1 << 2 != 0:
+                        xNew = self.vertexes[0].x + (yMin - self.vertexes[0].y) / (
+                                self.vertexes[1].y - self.vertexes[0].y) * (self.vertexes[1].x - self.vertexes[0].x)
+                        if self.vertexes[0].y < yMin:
+                            self.vertexes[0].x, self.vertexes[0].y = xNew, yMin
+                        elif self.vertexes[1].y < yMin:
+                            self.vertexes[1].x, self.vertexes[1].y = xNew, yMin
+                    # 有一点在yMax下方
+                    elif codeOr & 1 << 3 != 0:
+                        xNew = self.vertexes[0].x + (yMax - self.vertexes[0].y) / (
+                                self.vertexes[1].y - self.vertexes[0].y) * (self.vertexes[1].x - self.vertexes[0].x)
+                        if self.vertexes[0].y > yMax:
+                            self.vertexes[0].x, self.vertexes[0].y = xNew, yMax
+                        elif self.vertexes[1].y > yMax:
+                            self.vertexes[1].x, self.vertexes[1].y = xNew, yMax
 
-                # 将计算可能产生的小数坐标转整数
-                self.vertexes = list(map(lambda _vertex: Graph.Point(int(_vertex.x), int(_vertex.y)), self.vertexes))
-                return True
+                    # 将计算可能产生的小数坐标转整数
+                    self.vertexes = list(
+                        map(lambda _vertex: Graph.Point(int(_vertex.x), int(_vertex.y)), self.vertexes))
 
         elif algorithm == 'Liang-Barsky':
             uMin = 0

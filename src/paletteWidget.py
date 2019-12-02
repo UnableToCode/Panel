@@ -330,8 +330,9 @@ class PaletteWidget(PanelWidget):
             self.vertexes += [newX, newY]
             self.logger.info('add new point: x:{x} y:{y}'.format(x=newX, y=newY))
             if len(self.vertexes) == 4:
-                self.graph[self.selectGraphID].clip(self.vertexes[0], self.vertexes[1], self.vertexes[2],
-                                                    self.vertexes[3], self.algorithm)
+                if self.graph[self.selectGraphID].clip(self.vertexes[0], self.vertexes[1], self.vertexes[2],
+                                                       self.vertexes[3], self.algorithm) is False:
+                    self.graph.pop(self.selectGraphID)
                 self.logger.info('line clip finished')
                 self.quitDraw()
 
@@ -476,13 +477,12 @@ class PaletteWidget(PanelWidget):
 
         QCursor().setPos(self.mapToGlobal(QPoint(self.panelLabel.x() + int(self.panelLabel.width() / 2),
                                                  self.panelLabel.y() + int(self.panelLabel.height() / 2))))
-        if self.lineDialog.algorithmChoose.checkedId() == 0:
-            self.algorithm = 'DDA'
-        else:
-            self.algorithm = 'Bresenham'
-        # QCursor.setPos(self.x() + self.panelLabel.x() + self.panelLabel.width() / 2,
-        #                self.y() + self.panelLabel.y() + self.panelLabel.height() / 2)
-        # print('cusor pos: x:{x} y:{y}'.format(x=QCursor.pos().x(), y=QCursor.pos().y()))
+        # if self.lineDialog.algorithmChoose.checkedId() == 0:
+        #     self.algorithm = 'DDA'
+        # else:
+        #     self.algorithm = 'Bresenham'
+        self.algorithm = self.lineDialog.algorithmChoose.checkedButton().text()
+        # print(self.algorithm)
         self.lineDialog.close()
 
     def slotPolygonOkBtn(self):
@@ -493,10 +493,12 @@ class PaletteWidget(PanelWidget):
 
         QCursor().setPos(self.mapToGlobal(QPoint(self.panelLabel.x() + int(self.panelLabel.width() / 2),
                                                  self.panelLabel.y() + int(self.panelLabel.height() / 2))))
-        if self.lineDialog.algorithmChoose.checkedId() == 0:
-            self.algorithm = 'DDA'
-        else:
-            self.algorithm = 'Bresenham'
+        # if self.polygonDialog.algorithmChoose.checkedId() == 0:
+        #     self.algorithm = 'DDA'
+        # else:
+        #     self.algorithm = 'Bresenham'
+        self.algorithm = self.polygonDialog.algorithmChoose.checkedButton().text()
+        # print(self.algorithm)
         self.polygonDialog.close()
 
     def slotCurveOkBtn(self):
@@ -507,17 +509,21 @@ class PaletteWidget(PanelWidget):
 
         QCursor().setPos(self.mapToGlobal(QPoint(self.panelLabel.x() + int(self.panelLabel.width() / 2),
                                                  self.panelLabel.y() + int(self.panelLabel.height() / 2))))
-        if self.lineDialog.algorithmChoose.checkedId() == 0:
-            self.algorithm = 'Bezier'
-        else:
-            self.algorithm = 'B-spline'
+        # if self.curveDialog.algorithmChoose.checkedId() == 0:
+        #     self.algorithm = 'Bezier'
+        # else:
+        #     self.algorithm = 'B-spline'
+        self.algorithm = self.curveDialog.algorithmChoose.checkedButton().text()
+        # print(self.algorithm)
         self.curveDialog.close()
 
     def slotClipDialogOkBtn(self):
-        if self.lineDialog.algorithmChoose.checkedId() == 0:
-            self.algorithm = 'Cohen-Sutherland'
-        else:
-            self.algorithm = 'Liang-Barsky'
+        # if self.clipDialog.algorithmChoose.checkedId() == 0:
+        #     self.algorithm = 'Cohen-Sutherland'
+        # else:
+        #     self.algorithm = 'Liang-Barsky'
+        self.algorithm = self.clipDialog.algorithmChoose.checkedButton().text()
+        # print(self.algorithm)
         self.clipDialog.close()
         self.selectListFilter([Graph.LINE])
         self.selectDialog.setWindowTitle('Clip')
@@ -664,6 +670,7 @@ class AlgorithmDialog(QDialog):
         self.setFixedSize(200, 100)
         self.algorithmChoose.addButton(self.radioBtn1, 0)
         self.algorithmChoose.addButton(self.radioBtn2, 1)
+        self.algorithmChoose.setExclusive(True)
         self.radioBtn1.setChecked(True)
         self.cancelBtn.clicked.connect(self.close)
 
